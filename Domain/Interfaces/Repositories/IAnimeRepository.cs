@@ -4,9 +4,9 @@ namespace Domain.Interfaces.Repositories
 {
     public interface IAnimeRepository
     {
-        Task<IEnumerable<Anime>> GetAnime(string seachParameter, int pagNumber, int pagQuantity);
-        Task CreateAnime(Anime anime);
-        Task UpdateAnime(Anime anime);
-        Task DeleteAnime(long idAnime);
+        Task<IEnumerable<Anime>> GetAnime(string? name, string? director, string? keyWord, int pagNumber, int pagQuantity, CancellationToken cancellationToken);
+        Task CreateAnime(Anime anime, CancellationToken cancellationToken);
+        Task UpdateAnime(Anime anime, CancellationToken cancellationToken);
+        Task DeleteAnime(long idAnime, CancellationToken cancellationToken);
     }
 }

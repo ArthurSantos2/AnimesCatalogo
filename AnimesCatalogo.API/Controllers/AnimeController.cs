@@ -1,10 +1,13 @@
-﻿using Application.Services;
+﻿using Application.Dtos;
+using Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AnimesCatalogo.Controllers
 {
     [Route("v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class AnimeController : ControllerBase
     {
         private readonly ILogger<AnimeController> _logger;
@@ -16,51 +19,93 @@ namespace AnimesCatalogo.Controllers
             _animeService = animeService;
         }
 
-        // GET: api/<AnimeController>
+        /// <summary>
+        /// Obtenção de animes
+        /// </summary>
+        /// <param name="nome"></param>
+        /// <param name="diretor"></param>
+        /// <param name="palavra_chave"></param>
+        /// <param name="itensPorPagina"></param>
+        /// <param name="paginaAtual"></param>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<IActionResult> GetAnimes()
+        [ProducesResponseType<string>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAnimes(string? filtroNome = null, string? filtroDiretor = null, string? filtroPalavraChave = null, 
+            int itensPorPagina = 10, int paginaAtual = 1, CancellationToken cancellationToken = default)
         {
             try
             {
-                var response = _animeService.GetAnimes("Picachu", 1,1);
-
-                if (!response.IsCompletedSuccessfully)
+                var request = new ParametersDto()
                 {
-                    _logger.LogInformation(@$"Ocorreu um erro durante a busca dos animes |
-                        {response.Exception?.InnerException?.InnerException}");
-                    return Problem(detail: response.Exception?.InnerException?.InnerException?.ToString(), statusCode: 400);
-                }
+                    Nome = filtroNome,
+                    Diretor = filtroDiretor,
+                    PalavraChave = filtroPalavraChave,
+                    QuantidadePaginas = itensPorPagina,
+                    NumeroPagina = paginaAtual
+                };
+
+                var response = await _animeService.GetAnimes(request, cancellationToken);
 
                 _logger.LogInformation($"Retorno dos animes: {response}");
 
                 return Ok(response);
             }
+            catch(ApplicationException ex)
+            {
+                _logger.LogError(@$"Ocorreu um erro durante a busca dos animes | {ex.Message}");
+                return Problem(detail: ex.Message, statusCode: 400);
+            }
             catch (Exception exception)
             {
                 _logger.LogError($"{exception.Message}");
-                return Problem(detail: exception.Message, statusCode: 500);
+                return Problem(detail: "Houve uma falha, contate o suporte", statusCode: 500);
+            }
+        }
+        /// <summary>
+        /// Cadastro de Anime
+        /// </summary>
+        /// <response code="200">Received</response>
+        /// <response code="400">If the item is null</response>
+        [HttpPost]
+        [ProducesResponseType<string>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Post([FromBody] AnimeDto cadastro, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var response = await _animeService.InsertAnime(cadastro, cancellationToken);
+
+                _logger.LogInformation($"Cadastro do anime: {response}");
+
+                return Ok(response);
+            }
+            catch (ApplicationException ex)
+            {
+                _logger.LogError(@$"Ocorreu um erro durante o cadastro de animes | {ex.Message}");
+                return Problem(detail: ex.Message, statusCode: 400);
+            }
+            catch
+            {
+                return Problem(detail: "Houve uma falha, contate o suporte", statusCode: 500);
             }
         }
 
-        // POST api/<AnimeController>
-        [HttpPost]
-        public IActionResult Post([FromBody] string value)
+        [HttpPut]
+        public IActionResult Put(int id, [FromBody] RequestDto modificar)
         {
             return Ok();
         }
 
-        // PUT api/<AnimeController>/5
+        // DELETE api/<AnimeController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] string value)
+        public IActionResult Delete(int id)
         {
             return Ok();
         }
-
-        //// DELETE api/<AnimeController>/5
-        //[HttpPut("{id}")]
-        //public IActionResult Delete(int id)
-        //{
-        //    return Ok();
-        //}
     }
 }

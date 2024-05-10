@@ -12,10 +12,12 @@ namespace Domain.Entities
 
         protected Anime() { }
 
-        public Anime(string animeName, string description) 
+        public Anime(string animeName, string description, string directorName) 
         {
             AnimeName = animeName;
             Description = description;
+            DirectorName = directorName;
+            IsActive = true;
         }
 
         public void DesactiveAnime()
