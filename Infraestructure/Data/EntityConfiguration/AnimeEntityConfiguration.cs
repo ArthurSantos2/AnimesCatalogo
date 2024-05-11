@@ -12,14 +12,14 @@ namespace Infraestructure.Data.EntityConfiguration
 
             builder.HasKey(t => t.Id);
 
-            builder.Property(s => s.AnimeName)
-                .HasColumnName("AnimeName");
+            builder.Property(s => s.Name)
+                .HasColumnName("Name");
 
             builder.Property(s => s.Description)
                 .HasColumnName("Description");
 
-            builder.Property(s => s.DirectorName)
-                .HasColumnName("DirectorName");
+            builder.Property(s => s.Director)
+                .HasColumnName("Director");
 
             builder.Property(s => s.IsActive)
                 .HasColumnName("IsActive");

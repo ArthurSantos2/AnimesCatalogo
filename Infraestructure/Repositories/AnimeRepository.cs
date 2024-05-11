@@ -16,22 +16,30 @@ namespace Infraestructure.Repositories
 
         public IUnitOfWork UnitOfWork => _dbContext;
 
-        public async Task<IEnumerable<Anime>> GetAnime(string? name, string? director, string? keyWord, int pagNumber, int pagQuantity, CancellationToken cancellationToken)
+        public async Task<List<Anime>> GetAnime(string? name, string? director, string? keyWord, int pagNumber, int pagQuantity, CancellationToken cancellationToken)
         {
             var query = _dbContext.Animes
-                .Where(s => s.IsActive == true && 
-                (s.AnimeName == name 
-                || s.DirectorName == director 
+                .Where(s => s.IsActive == true &&
+                (s.Name == name
+                || s.Director == director
                 || s.Description.Contains(keyWord)))
-                .Skip((pagNumber - 1) * pagQuantity) 
-                .Take(pagQuantity);                 
+                .Skip((pagNumber - 1) * pagQuantity)
+                .Take(pagQuantity);
 
             return await query.ToListAsync(cancellationToken);
         }
 
-        public Task UpdateAnime(Anime anime, CancellationToken cancellationToken)
+        public Task UpdateAnime(long id, Anime anime, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _dbContext.Animes
+                .Where(b => b.Id == id)
+                .ExecuteUpdate(s => s.SetProperty(b => b.Name, anime.Name)
+                                        .SetProperty(b => b.Director, anime.Director)
+                                            .SetProperty(b => b.Description, anime.Description));
+
+            return Task.CompletedTask;
         }
         public Task CreateAnime(Anime anime, CancellationToken cancellationToken)
         {
@@ -42,11 +50,26 @@ namespace Infraestructure.Repositories
             return Task.CompletedTask;
         }
 
-        public Task DeleteAnime(long idAnime, CancellationToken cancellationToken)
+        public async Task<Anime> GetAnimeById(long id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var anime = await _dbContext.Animes
+                .Where(s => s.IsActive == true && s.Id == id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            return anime;
         }
 
-        
+        public Task DeleteAnime(long idAnime, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _dbContext.Animes
+                .Where(b => b.Id == idAnime)
+                .ExecuteUpdate(s => s.SetProperty(b => b.IsActive, false));
+
+            return Task.CompletedTask;
+        }
+
+
     }
 }
