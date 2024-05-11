@@ -1,4 +1,5 @@
 ﻿
+using Application.Dtos;
 using Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +8,7 @@ using WebApi.Application.Auth;
 
 namespace AnimesCatalogo.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class TokenController : ControllerBase
     {
@@ -22,8 +23,20 @@ namespace AnimesCatalogo.Controllers
             _signInManager = signInManager;
         }
 
+        /// <summary>
+        /// Criação de Token
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        /// <response code="200">Foi cadastrado com sucesso</response>
+        /// <response code="401">Ausência de autorização</response>
+        /// </returns>
+        [HttpPost]
+        [ProducesResponseType<AnimeDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [AllowAnonymous]
-        [HttpPost("/api/CreateToken")]
+        [HttpPost]
         public async Task<IActionResult> CreateToken([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(request.Email) || string.IsNullOrEmpty(request.Password))

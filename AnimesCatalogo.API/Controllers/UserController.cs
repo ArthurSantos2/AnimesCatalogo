@@ -1,4 +1,5 @@
 ﻿using Applicaion.Models;
+using Application.Dtos;
 using Application.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace AnimesCatalogo.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("v1/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -21,14 +22,25 @@ namespace AnimesCatalogo.Controllers
             _signInManager = signInManager;
         }
 
-
+        /// <summary>
+        /// Cadastro de Login
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        /// <response code="200">Foi cadastrado com sucesso</response>
+        /// <response code="400">Ausência de autorização</response>
+        /// </returns>
+        [HttpPost]
+        [ProducesResponseType<AnimeDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [AllowAnonymous]
-        [HttpPost("/api/AdicionaUsuario")]
+        [HttpPost]
         public async Task<IActionResult> AdicionaUsuario([FromBody] AddUserRequest login)
         {
             if (string.IsNullOrWhiteSpace(login.Email) || string.IsNullOrWhiteSpace(login.Password)
                 || string.IsNullOrWhiteSpace(login.Document))
-                return Ok("Falta alguns dados");
+                return BadRequest("Falta alguns dados");
 
 
             var user = new ApplicationUser
@@ -56,7 +68,7 @@ namespace AnimesCatalogo.Controllers
             if (resultado2.Succeeded)
                 return Ok("Usuário Adicionado com Sucesso");
             else
-                return Ok("Erro ao confirmar usuários");
+                return BadRequest("Erro ao confirmar usuário");
 
         }
 

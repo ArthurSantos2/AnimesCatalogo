@@ -79,7 +79,7 @@ namespace AnimesCatalogo.Controllers
         /// <param name="cadastro"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>
-        /// <response code="201">Foi cadastrado com sucesso</response>
+        /// <response code="200">Foi cadastrado com sucesso</response>
         /// <response code="400">A solicitação foi enviada com erro, revisar</response>
         /// <response code="401">Ausência de autorização</response>
         /// <response code="500">Erro interno</response>
